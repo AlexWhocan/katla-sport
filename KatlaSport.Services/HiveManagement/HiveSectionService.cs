@@ -88,6 +88,8 @@ namespace KatlaSport.Services.HiveManagement
             var dbHiveSection = Mapper.Map<UpdateHiveSectionRequest, DbHiveSection>(createRequest);
             dbHiveSection.CreatedBy = _userContext.UserId;
             dbHiveSection.LastUpdatedBy = _userContext.UserId;
+            dbHiveSection.Created = DateTime.UtcNow;
+            dbHiveSection.LastUpdated = DateTime.UtcNow;
             dbHiveSection.StoreHiveId = createRequest.HiveId;
             _context.Sections.Add(dbHiveSection);
 
