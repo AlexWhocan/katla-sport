@@ -69,5 +69,56 @@ namespace KatlaSport.WebApi.Controllers
             await _hiveService.SetStatusAsync(hiveId, deletedStatus);
             return ResponseMessage(Request.CreateResponse(HttpStatusCode.NoContent));
         }
+
+        [HttpPost]
+        [Route("")]
+        [SwaggerResponse(HttpStatusCode.Created, Description = "New hive created.")]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Incorrect(bad) request coul not be carried out by server.")]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "The request couldn't be carried out because of a conflict on the server.")]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error occured.")]
+        public async Task<IHttpActionResult> AddHive([FromBody] UpdateHiveRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Hive hive = await _hiveService.CreateHiveAsync(request);
+            var location = string.Format("/api/hives/{0}", hive.Id);
+
+            return Created<Hive>(location, hive);
+        }
+
+        [HttpPut]
+        [Route("{hiveId:int:min(1)}")]
+        [SwaggerResponse(HttpStatusCode.NoContent, Description = "Existed hive updated.")]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Incorrect(bad) request coul not be carried out by server.")]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "The request couldn't be carried out because of a conflict on the server.")]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error occured.")]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "The requested source doesn't exist on the server.")]
+        public async Task<IHttpActionResult> UpdateHiveAsync([FromUri] int hiveId, [FromBody] UpdateHiveRequest updateRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _hiveService.UpdateHiveAsync(hiveId, updateRequest);
+
+            return ResponseMessage(Request.CreateResponse(HttpStatusCode.NoContent));
+        }
+
+        [HttpDelete]
+        [Route("{hiveId:int:min(1)}")]
+        [SwaggerResponse(HttpStatusCode.NoContent, Description = "Existed hive deleted.")]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Incorrect(bad) request coul not be carried out by server.")]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "The request couldn't be carried out because of a conflict on the server.")]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error occured.")]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "The requested source doesn't exist on the server.")]
+        public async Task<IHttpActionResult> DeleteHiveAsync([FromUri] int hiveId)
+        {
+            await _hiveService.DeleteHiveAsync(hiveId);
+            return ResponseMessage(Request.CreateResponse(HttpStatusCode.NoContent));
+        }
     }
 }
