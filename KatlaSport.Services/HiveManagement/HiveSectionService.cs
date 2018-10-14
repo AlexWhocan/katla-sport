@@ -75,5 +75,68 @@ namespace KatlaSport.Services.HiveManagement
                 await _context.SaveChangesAsync();
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<HiveSection> CreateHiveSectionAsync(UpdateHiveSectionRequest createRequest)
+        {
+            var dbHiveSections = await _context.Sections.Where(h => h.Code == createRequest.Code).ToArrayAsync();
+            if (dbHiveSections.Length > 0)
+            {
+                throw new RequestedResourceHasConflictException("code");
+            }
+
+            var dbHiveSection = Mapper.Map<UpdateHiveSectionRequest, DbHiveSection>(createRequest);
+            dbHiveSection.CreatedBy = _userContext.UserId;
+            dbHiveSection.LastUpdatedBy = _userContext.UserId;
+            dbHiveSection.StoreHiveId = createRequest.HiveId;
+            _context.Sections.Add(dbHiveSection);
+
+            await _context.SaveChangesAsync();
+
+            return Mapper.Map<HiveSection>(dbHiveSection);
+        }
+
+        /// <inheritdoc/>
+        public async Task<HiveSection> UpdateHiveSectionAsync(int sectionId, UpdateHiveSectionRequest updateRequest)
+        {
+            var dbHiveSections = await _context.Sections.Where(h => (h.Code == updateRequest.Code) && (h.Id != sectionId)).ToArrayAsync();
+            if (dbHiveSections.Length > 0)
+            {
+                throw new RequestedResourceHasConflictException("Multiple sections affected");
+            }
+
+            if (dbHiveSections.Length == 0)
+            {
+                throw new RequestedResourceNotFoundException();
+            }
+
+            var dbHiveSection = dbHiveSections[0];
+            Mapper.Map(updateRequest, dbHiveSection);
+            dbHiveSection.LastUpdatedBy = _userContext.UserId;
+            dbHiveSection.LastUpdated = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Mapper.Map<HiveSection>(dbHiveSection);
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteHiveSectionAsync(int sectionId)
+        {
+            var dbHiveSections = await _context.Sections.Where(h => h.Id == sectionId).ToArrayAsync();
+            if (dbHiveSections.Length == 0)
+            {
+                throw new RequestedResourceNotFoundException();
+            }
+
+            var dbHiveSection = dbHiveSections[0];
+            if (dbHiveSection.IsDeleted == false)
+            {
+                throw new RequestedResourceHasConflictException();
+            }
+
+            _context.Sections.Remove(dbHiveSection);
+            await _context.SaveChangesAsync();
+        }
     }
 }

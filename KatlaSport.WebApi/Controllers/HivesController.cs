@@ -76,7 +76,7 @@ namespace KatlaSport.WebApi.Controllers
         [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Incorrect(bad) request coul not be carried out by server.")]
         [SwaggerResponse(HttpStatusCode.Conflict, Description = "The request couldn't be carried out because of a conflict on the server.")]
         [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error occured.")]
-        public async Task<IHttpActionResult> AddHive([FromBody] UpdateHiveRequest request)
+        public async Task<IHttpActionResult> AddHiveAsync([FromBody] UpdateHiveRequest request)
         {
             if (!ModelState.IsValid)
             {
