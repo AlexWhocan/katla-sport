@@ -90,7 +90,7 @@ namespace KatlaSport.Services.HiveManagement
             dbHiveSection.LastUpdatedBy = _userContext.UserId;
             dbHiveSection.Created = DateTime.UtcNow;
             dbHiveSection.LastUpdated = DateTime.UtcNow;
-            dbHiveSection.StoreHiveId = createRequest.HiveId;
+            dbHiveSection.StoreHiveId = createRequest.StoreHiveId;
             _context.Sections.Add(dbHiveSection);
 
             await _context.SaveChangesAsync();
@@ -101,12 +101,13 @@ namespace KatlaSport.Services.HiveManagement
         /// <inheritdoc/>
         public async Task<HiveSection> UpdateHiveSectionAsync(int sectionId, UpdateHiveSectionRequest updateRequest)
         {
-            var dbHiveSections = await _context.Sections.Where(h => (h.Code == updateRequest.Code) && (h.Id != sectionId)).ToArrayAsync();
+            var dbHiveSections = await _context.Sections.Where(h => h.Code == updateRequest.Code && h.Id != sectionId).ToArrayAsync();
             if (dbHiveSections.Length > 0)
             {
                 throw new RequestedResourceHasConflictException("Multiple sections affected");
             }
 
+            dbHiveSections = await _context.Sections.Where(p => p.Id == sectionId).ToArrayAsync();
             if (dbHiveSections.Length == 0)
             {
                 throw new RequestedResourceNotFoundException();
